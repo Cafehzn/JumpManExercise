@@ -1,8 +1,17 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;//Singleton Method
+
+    [SerializeField] private TextMeshProUGUI gameOverText;//Game Over Variable
+    [SerializeField] private ParticleSystem explosionParticle;//Explosion Particle
+    //Foot Dust Particles
+    [SerializeField] private ParticleSystem rightFoot;
+    [SerializeField] private ParticleSystem leftFoot;
+
     private Rigidbody playerRb;
     public float gravityModifier = 1.3f;
     public float jumpForce = 8f;
@@ -14,6 +23,15 @@ public class PlayerController : MonoBehaviour
     //Animation
     private Animator playerAnim;
 
+    private void Awake()
+    {
+        //Singleton
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+    }
+
     private void Start()
     {
         playerRb = GetComponent<Rigidbody>();
@@ -24,6 +42,10 @@ public class PlayerController : MonoBehaviour
     {
         if(value.isPressed && isOnGround)
         {
+            //Stop dust particles
+            rightFoot.Stop();
+            leftFoot.Stop();
+
             playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isOnGround = false;
 
@@ -36,12 +58,21 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            isOnGround |= true;
+            isOnGround = true;
+            //Reactivate particles
+            rightFoot.Play();
+            leftFoot.Play();
         }
         if (collision.gameObject.CompareTag("Obstacle"))
         {
+            isOnGround = false;
+            rightFoot.Stop();
+            leftFoot.Stop();
+
             gameOver = true;
-            Debug.Log("You Died!");
+            gameOverText.gameObject.SetActive(true);
+            explosionParticle.Play();
+            Destroy(collision.gameObject);
             playerAnim.SetBool("Death_b", true);
             playerAnim.SetInteger("DeathType_int", 1);
         }
