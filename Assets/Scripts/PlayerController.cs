@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private ParticleSystem rightFoot;
     [SerializeField] private ParticleSystem leftFoot;
 
+    [SerializeField] private AudioSource music;
+    private AudioSource playerJump;
+
     private Rigidbody playerRb;
     public float gravityModifier = 1.3f;
     public float jumpForce = 8f;
@@ -36,10 +39,13 @@ public class PlayerController : MonoBehaviour
     {
         playerRb = GetComponent<Rigidbody>();
         playerAnim = GetComponent<Animator>();
+        playerJump = GetComponent<AudioSource>();
     }
 
     public void OnJump(InputValue value)
     {
+        playerJump.PlayOneShot(playerJump.clip, 1.0f);
+
         if(value.isPressed && isOnGround)
         {
             //Stop dust particles
@@ -56,7 +62,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision) 
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") && !gameOver)
         {
             isOnGround = true;
             //Reactivate particles
@@ -65,9 +71,9 @@ public class PlayerController : MonoBehaviour
         }
         if (collision.gameObject.CompareTag("Obstacle"))
         {
-            isOnGround = false;
             rightFoot.Stop();
             leftFoot.Stop();
+            music.Stop();
 
             gameOver = true;
             gameOverText.gameObject.SetActive(true);
