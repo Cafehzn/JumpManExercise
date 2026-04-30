@@ -9,15 +9,13 @@ public class ScoreCount : MonoBehaviour
     {
         scoreText.text = $"Score: {score}";
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Obstacle"))
+        if (other.CompareTag("Obstacle"))
         {
-            scoreText.text = $"Score: {score++}";
-        }
-        else
-        {
-            Debug.Log("Error: score cannot count!");
+            score++;
+            scoreText.text = $"Score: {score} ";
         }
     }
+
 }
